@@ -1,0 +1,5 @@
+
+
+create table orders (oid bigint not null, odate datetime2, order_state varchar(255), prod_price numeric(19,2), ship_price numeric(19,2), tax_price numeric(19,2), user_name varchar(255), primary key (oid))
+
+create table order_item_mapping (mappingid bigint identity not null, oid bigint not null, pid varchar(255), pname varchar(255), unitprice numeric(19,2), units int not null, primary key (mappingid))

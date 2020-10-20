@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html lang="end" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header" />
+<body>
+	<div th:replace="header/header :: navbar" />
+	<div class="contact">
+		<div class="container">
+			<ol class="breadcrumb">
+				<li><a th:href="@{/view-products}">Home</a></li>
+				<li><a th:href="@{/updateProduct(id=${product.productId})}">Edit</a></li>
+			</ol>
+			<div class="row">
+				<div class="col-xs-3">
+					<div class="panel panel-body">
+						<img class="img-responsive"
+							th:src="@{product_images/}+${product.productId}+'.jpg'">
+					</div>
+				</div>
+				<div class="col-xs-9">
+					<h3 th:text="${'Title: ' + product.productName}"></h3>
+					<div class="row">
+						<div class="col-xs-6">
+							<p>
+								<strong>Seller: </strong><span th:text="${product.producer}"></span>
+							</p>
+							<p>
+								<strong>Category: </strong><span th:text="${product.productCategory}"></span>
+							</p>
+							<p>
+								<strong>Published Date: </strong><span
+									th:text="${product.createTime}"></span>
+							</p>
+						</div>
+						<div class="col-xs-6">
+							<p>
+								<strong>Shipping Weight: </strong><span
+									th:text="${product.shippingWeight}"></span>
+							</p>
+							<p>
+								<strong>Price: </strong><span th:text="${product.productPrice}"></span>
+							</p>
+							<p>
+								<strong>In Stock: </strong><span
+									th:text="${product.productStock}"></span>
+							</p>
+						</div>
+					</div>
+					<hr>
+					<p>
+						<strong>Description: <br></strong><span
+							th:utext="${product.productDescription}"></span>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="header/header :: footer" />
+</body>
+</html>

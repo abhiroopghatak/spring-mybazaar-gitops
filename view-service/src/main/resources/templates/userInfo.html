@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="end" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header"/>
+<body>
+<!-- header -->
+<div th:replace="header/header :: all_product_header"/>
+<div class="contact">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a th:href="@{/view-users}">Home</a></li>
+            <li><a th:href="@{/userUpdate(id=${users.id})}">Edit</a></li>
+        
+        </ol>
+        <div class="row">
+            <div class="col-xs-9">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <p><strong>First Name: </strong><span th:text="${users.firstName}"></span></p>
+                        <p><strong>Last Name: </strong><span th:text="${users.lastName}"></span></p>
+                        <p><strong>Username: </strong><span th:text="${users.username}"></span></p>
+                        <p><strong>Email: </strong><span th:text="${users.email}"></span></p>
+                        <p><strong>Roles: </strong><span th:text="${users.roles}"></span></p>
+                    </div>
+                    <div class="col-xs-6">
+                    
+                    </div>
+                </div>
+                <hr>
+            </div>
+        </div>
+    
+    </div>
+</div>
+
+<div th:replace="header/header :: footer"/>
+<!---->
+</body>
+</html>

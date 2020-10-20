@@ -1,0 +1,56 @@
+
+<!DOCTYPE HTML>
+<html lang="end" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header" />
+<body>
+	<div th:replace="header/header :: all_product_header" />
+	<div class="contact">
+		<div class="container">
+			<legend>List of products</legend>
+			<div class="table-responsive">
+				<table id="productAll"
+					class="table table-bordered table-hover table-striped w-auto">
+					<thead class="thead-dark">
+						<tr>
+							<th>ID</th>
+							<th>Title</th>
+							<th>Seller</th>
+							<th>Category</th>
+							<th>Date Crated</th>
+							<th>Shipping Weight</th>
+							<th>Product Price</th>
+							<th>In Stock</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr data-th-each="product : ${productList}">
+							<th><input hidden="hidden" name="id"
+								th:value="${product.productId}" /></th>
+							<td th:text="${product.productName}"></td>
+							<td th:text="${product.producer}"></td>
+							<td th:text="${product.productCategory}"></td>
+							<td th:text="${product.createTime}"></td>
+							<td th:text="${product.shippingWeight}"></td>
+							<td th:text="${'$'+product.productPrice}"></td>
+							<td th:text="${product.productStock}"></td>
+							<td><span style="color: #19ed52"><a
+									th:href="@{/updateProduct(id=${product.productId})}"> Edit</a></span> | <span
+								style="color: #ed3736"><a
+									th:href="@{/deleteProduct(id=${product.productId})}"> Delete</a></span> | <span
+								style="color: #366ded"><a
+									th:href="@{/productInfo(id=${product.productId})}"> View</a></span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#productAll').dataTable();
+		});
+	</script>
+	<div th:replace="header/header :: footer" />
+</body>
+</html>

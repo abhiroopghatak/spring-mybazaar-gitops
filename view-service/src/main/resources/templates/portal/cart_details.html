@@ -1,0 +1,311 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+</head>
+
+
+<body>
+	<link th:href="@{/css/custom/cart.css}" rel="stylesheet"
+		type="text/css" media="all" />
+	
+	<div th:replace="header/header :: all_product_header" />
+
+
+
+	<section class="jumbotron text-center">
+		<div class="container">
+			<h1 class="jumbotron-heading">
+				Your Shopping Cart
+				<button id="empty-cart-btn" class="btn btn-sm btn-danger delete-btn"
+					data-toggle="modal" data-target="#cartemptyconfirmation">
+					<i class="fa fa-trash"></i> Empty Cart
+				</button>
+			</h1>
+		</div>
+	</section>
+	<div class="container mb-4">
+
+		<div class="row">
+			<div class="col-12">
+				<div id="loadingdiv" class="jumbotron text-center d-none">
+					<i class="fa fa-circle-o-notch fa-spin"></i> loading...
+				</div>
+				<div id="checkout-failure-msg" class="alert alert-danger d-none"
+					role="alert">Cart checkout is not successful at this moment .
+					Please try again later.</div>
+				<div id="checkout-success-msg" class="alert alert-success d-none"
+					role="alert">Cart checkout is successful . You may find details at order section</div>
+				<div class="table-responsive">
+					<table id="carttable" class="table table-striped">
+						<thead>
+							<tr>
+								<th scope="col"></th>
+								<th scope="col">Product</th>
+								<th scope="col">Available</th>
+								<th scope="col" class="text-center">Manufactured Date</th>
+								<th scope="col" class="text-center">Quantity</th>
+								<th scope="col" class="text-right">Price</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+
+
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="col mb-2">
+				<div class="row">
+					<div class="col-sm-12  col-md-6">
+						<button class="btn btn-lg btn-block btn-warning"
+							onclick="goshopping()">Continue Shopping</button>
+					</div>
+					<div class="col-sm-12 col-md-6 text-right">
+						<button id="checkout-btn"
+							class="btn btn-lg btn-block btn-success text-uppercase"
+							data-toggle="modal" data-target="#confirmationModal">Checkout</button>
+					</div>
+				</div>
+			</div>
+
+
+			<div class="modal fade" id="confirmationModal" tabindex="-1"
+				role="dialog" aria-labelledby="confirmationModal" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="chkout-modal-title">Are you sure
+								to checkout</h5>
+							<button type="button" class="close" data-dismiss="modal"
+								aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div id="chkout-modal-body" class="modal-body">If you have
+							added all in your cart click confirm to go for payment. 10% tax will be applicable during checkout.</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary"
+								data-dismiss="modal">Close</button>
+							<button id="chkout-final" type="button" class="btn btn-primary"
+								onclick="docheckout()">Confirm</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="cartemptyconfirmation" tabindex="-1"
+				role="dialog" aria-labelledby="cartemptyconfirmation"
+				aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="cartemptyconfirmation">Are you
+								sure ??</h5>
+							<button type="button" class="close" data-dismiss="modal"
+								aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">If you are sure to remove all items
+							from cart , click confirm.</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-success"
+								data-dismiss="modal">Cancel</button>
+							<button type="button" class="btn btn-danger"
+								onclick="emptyCart()">Confirm</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<div th:replace="header/header :: footer" />
+
+	<script type="text/javascript">
+		function goshopping() {
+			location.href = "/home";
+		}
+
+		function docheckout() {
+			event.preventDefault();
+			$('#loadingdiv').removeClass('d-none');
+			$('.table-responsive').addClass('d-none');
+			$('#confirmationModal').modal('hide');
+			$.ajax({
+				url : '/docheckout',
+				type : 'POST',
+				data : {},
+				dataType : 'json',
+				success : function(response) {
+					console.log(response);
+					if (response)
+						$('#checkout-success-msg').removeClass('d-none');
+					else
+						$('#checkout-failure-msg').removeClass('d-none');
+					loadCart();
+				},
+				error : function(xhr, status, error) {
+					var errorMessage = xhr.status + ': ' + xhr.statusText
+					console.log('Error - ' + errorMessage);
+					$('#checkout-failure-msg').removeClass('d-none');
+					$('#loadingdiv').addClass('d-none');
+					$('.table-responsive').removeClass('d-none');
+				}
+			});
+
+		}
+		function removeFromCart(pid, units) {
+			event.preventDefault();
+			$('#loadingdiv').removeClass('d-none');
+			$('.table-responsive').addClass('d-none');
+			$.ajax({
+				url : '/removethisfromcart',
+				type : 'POST',
+				data : {
+					"productId" : pid,
+					"units" : units
+				},
+				dataType : 'json',
+				success : function(response) {
+					console.log(response);
+
+					loadCart();
+				},
+				error : function(xhr, status, error) {
+					var errorMessage = xhr.status + ': ' + xhr.statusText
+					console.log('Error - ' + errorMessage);
+					$('#loadingdiv').addClass('d-none');
+					$('.table-responsive').removeClass('d-none');
+				}
+			});
+			console.log(pid + ' remove from cart');
+		}
+		function emptyCart() {
+
+			$('#cartemptyconfirmation').modal('hide');
+			event.preventDefault();
+			$.ajax({
+				url : '/removeallfromcart',
+				type : 'POST',
+				data : {
+
+				},
+				dataType : 'json',
+				success : function(response) {
+					console.log(response);
+
+					loadCart();
+				},
+				error : function(xhr, status, error) {
+					var errorMessage = xhr.status + ': ' + xhr.statusText
+					console.log('Error - ' + errorMessage);
+				}
+			});
+
+		}
+		$(document).ready(function() {
+			loadCart();
+
+			$('.like-btn').click(function(e) {
+				$(this).toggleClass('is-active');
+			});
+
+		});
+
+		function loadCart() {
+			$('#loadingdiv').removeClass('d-none');
+			$('.table-responsive').addClass('d-none');
+			$
+					.ajax({
+						url : '/loadcart',
+						type : 'GET',
+						success : function(response) {
+							var html_prod_section = '';
+							var total_prod_price = 0;
+							var total_shipping_price = 100;
+							var total_payable = 0;
+							console.log(response);
+
+							console.log('prodlist =' + response);
+							$('#carttable tbody').empty();
+							if (Array.isArray(response) && response.length) {
+								$
+										.each(
+												response,
+												function(index, product) {
+													total_prod_price = total_prod_price
+															+ product.unitPrice
+															* product.units;
+													var created_at = new Date(
+															Date
+																	.parse(product.createTime));
+													html_prod_section = html_prod_section
+															+ '<tr><td><img class="img-responsive img-thumbnail" width="150px" height="150px" src="/product_images/'+product.productId + '.jpg" /></td><td>'
+															+ product.productName
+															+ '</td><td>In stock</td><td class="text-center">'
+															+ created_at
+																	.getDate()
+															+ '-'
+															+ (created_at
+																	.getMonth() + 1)
+															+ '-'
+															+ created_at
+																	.getFullYear()
+															+ '</td><td class="text-center">'
+															+ product.units
+															+ '</td><td class="text-right">  Rs.'
+															+ product.unitPrice
+															* product.units
+															+ '</td><td class="text-right"><button class="btn btn-sm btn-danger delete-btn"  onclick="removeFromCart(\''
+															+ product.productId
+															+ '\','
+															+ product.units
+															+ ')"><i class="fa fa-trash"></i></button></td></tr>'
+												});
+								total_payable = total_prod_price
+										+ total_shipping_price;
+								$('#carttable tbody').append(html_prod_section);
+								var tableBottomText = ' <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Sub-Total</td> <td class="text-right">Rs. '
+										+ total_prod_price
+										+ '</td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Shipping</td> <td class="text-right"> Rs. '
+										+ total_shipping_price
+										+ '</td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td><strong>Total</strong></td> <td class="text-right"><strong>Rs. '
+										+ total_payable
+										+ '</strong></td> </tr>';
+								$('#carttable tbody').append(tableBottomText);
+
+							} else {
+								$('#carttable thead').empty();
+								$('#empty-cart-btn').addClass('d-none');
+								$('#chkout-modal-body')
+										.html(
+												'No Items in cart . Please continue shopping');
+								$('#chkout-final').addClass('disabled');
+								$('#carttable thead')
+										.html(
+												'<div id="alertmsg" class="alert alert-warning "role="alert">No items is available in the cart</div>')
+							}
+							$('#loadingdiv').addClass('d-none');
+							$('.table-responsive').removeClass('d-none');
+
+						},
+						error : function(xhr, status, error) {
+							var errorMessage = xhr.status + ': '
+									+ xhr.statusText
+							console.log('Error - ' + errorMessage);
+							$('#loadingdiv').addClass('d-none');
+							$('.table-responsive').removeClass('d-none');
+						}
+					});
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+image: maven:latest
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  CI_COMMIT_TAG: $CI_COMMIT_SHORT_SHA
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+stages:
+  - build
+  - test
+  - codequality
+  - package
+  - deploy
+  - imagebuild
+  - imagescanreport
+
+build:
+  stage: build
+  script:
+    - echo "Container image for this build will tagged as $CI_COMMIT_SHORT_SHA"
+    - echo $CI_COMMIT_SHA 
+    - echo "mvn build starts"
+    - mvn $MAVEN_CLI_OPTS compile
+    
+test: 
+  stage: test  
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+    - echo "The code has been tested"
+    
+codequality:
+  stage: codequality
+  script:
+    - mvn verify sonar:sonar -Dsonar.qualitygate.wait=true
+  allow_failure: true
+
+package:
+  stage: package 
+  script: 
+    - mvn $MAVEN_CLI_OPTS package -Dmaven.test.skip=true -DuniqueVersion=false
+    - echo "Packaging the code" 
+  artifacts: 
+     paths: 
+      - target/*.jar 
+  only: 
+   - master    
+    
+deploy:
+  stage: deploy 
+  script: 
+    - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true 
+    - echo "installing the package in local repository" 
+  only: 
+   - master
+
+imagebuild:
+    stage: imagebuild
+    image:
+      name: gcr.io/kaniko-project/executor:debug
+      entrypoint: [""]
+    variables:
+        NEXUS_REPO_USER: $NEXUS_REPO_USER
+        NEXUS_REPO_PASS: $NEXUS_REPO_PASS
+    script:
+      - echo "{\"auths\":{\"$CI_IMG_REGISTRY\":{\"username\":\"$CI_IMG_REGISTRY_USER\",\"password\":\"$CI_IMG_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+      - /kaniko/executor --insecure --skip-tls-verify --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_IMG_REGISTRY/$CI_IMG_REGISTRY_PROJECT/$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG --build-arg NEXUS_REPO_USER=$NEXUS_REPO_USER --build-arg NEXUS_REPO_PASS=$NEXUS_REPO_PASS --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
+
+imagescanreport:
+  stage: imagescanreport
+  image:
+    name: docker.io/simplealpine/json2yaml
+    entrypoint: ["/bin/json2yaml"]
+  script:
+    - apk --no-cache add curl
+    - curl -k -u $CI_IMG_REGISTRY_USER:$CI_IMG_REGISTRY_PASSWORD "https://$CI_IMG_REGISTRY/api/v2.0/projects/$CI_IMG_REGISTRY_PROJECT/repositories/$CI_REGISTRY_IMAGE/artifacts/$CI_COMMIT_TAG/additions/vulnerabilities"| /bin/json2yaml > target/$CI_REGISTRY_IMAGE-scanreport.yaml
+    - echo "Downloading scan report" 
+  artifacts:
+     paths:
+      - target/*.yaml
+  only: 
+   - master

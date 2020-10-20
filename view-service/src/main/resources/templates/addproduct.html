@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<html lang="end" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header" />
+<body>
+	<div th:replace="header/header :: add_product_header" />
+	<div class="contact">
+		<div class="container">
+			<form class="form-horizontal" th:action="@{/product/save}"
+				method="post" enctype="multipart/form-data">
+				<legend>Add Product</legend>
+				<div class="form-group">
+					<label class="col-md-4 control-label">PRODUCT ID</label>
+					<div class="col-md-8">
+						<input id="title" name="productId" placeholder="PRODUCT ID"
+							class="form-control input-md" required="required"
+							th:value="${product.productId}" type="text"
+							style="width: 400px !important;" />
+					</div>
+					<label class="col-md-4 control-label">PRODUCT NAME</label>
+					<div class="col-md-8">
+						<input id="title" name="productName" placeholder="PRODUCT NAME"
+							class="form-control input-md" required="required"
+							th:value="${product.productName}" type="text"
+							style="width: 400px !important;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">SELLER</label>
+					<div class="col-md-4">
+						<input id="publisher" name="producer" placeholder="Seller"
+							th:value="${product.producer}" class="form-control input-md"
+							type="text" style="width: 400px !important;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">PRODUCT CATEGORY</label>
+					<div class="col-md-4">
+						<select id="category" name="productCategory"
+							th:value="${product.productCategory}" class="form-control"
+							style="width: 200px !important;">
+							<option value="ELECTRONICS"
+								th:selected="(${product.productCategory} == 'ELECTRONICS')">Electronic</option>
+
+							<option value="FOOTWEAR"
+								th:selected="(${product.productCategory} == 'FOOTWEAR')">Footwear</option>
+							<option value="BABYCLOTHS"
+								th:selected="(${product.productCategory} == 'BABYCLOTHS')">BabyCloths</option>
+							<option value="JEWELLERY"
+								th:selected="(${product.productCategory} == 'JEWELLERY')">Jewellery</option>
+							<option value="GROCERRY"
+								th:selected="(${product.productCategory} == 'GROCERRY')">Grocery</option>
+							<option value="BOOK"
+								th:selected="(${product.productCategory} == 'BOOK')">Book</option>
+							<option value="BEVERAGE"
+								th:selected="(${product.productCategory} == 'BEVERAGE')">Beverage</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">PRODUCT DATE CREATED</label>
+					<div class="col-md-4">
+						<input id="publishedDate" name="createTime"
+							th:value="${product.createTime}" class="form-control input-md"
+							required="required" type="date" style="width: 400px !important;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">SHIPPING WEIGHT</label>
+					<div class="col-md-4">
+						<input id="shippingWeight" name="shippingWeight"
+							th:value="${product.shippingWeight}"
+							class="form-control input-md" required="required" type="number"
+							style="width: 400px !important;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">PRODUCT PRICE</label>
+					<div class="col-md-4">
+						<input id="listPrice" name="productPrice"
+							th:value="${product.productPrice}" class="form-control input-md"
+							required="required" type="number"
+							style="width: 400px !important;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">PRODUCT DESCRIPTION</label>
+					<div class="col-md-4">
+						<textarea id="description" name="productDescription"
+							th:value="${product.productDescription}" class="form-control"
+							rows="5" style="width: 400px !important;"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">IN STOCK</label>
+					<div class="col-md-4">
+						<input id="inStockNumber" name="productStock"
+							th:value="${product.productStock}" class="form-control input-md"
+							required="required" type="number"
+							style="width: 400px !important;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label">UPLOAD PRODUCT IMAGE</label>
+					<div class="col-md-4">
+						<input id="productImage" name="productImage"
+							class="form-control input-md" required="required" type="file" />
+					</div>
+					<hr>
+				</div>
+				<div class="center-block">
+					<input id="singlebutton" name="singlebutton"
+						style="margin-left: 34%;" class="btn btn-primary" type="submit"
+						value="Add Product" />
+				</div>
+			</form>
+		</div>
+	</div>
+	<div th:replace="header/header :: footer" />
+</body>
+</html>

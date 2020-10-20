@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="end" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header" />
+<meta charset="UTF-8">
+<title>myBazaar</title>
+<body>
+	<div th:replace="header/header :: noLogin" />
+	<div class="contact">
+		<div class="container">
+
+			
+			<div class="contact-head">
+				<h2>Login</h2>
+				<div class="col-md-7 log">
+<div class="modal " id="pleaseWaitDialog" data-backdrop="static"
+				data-keyboard="false">
+				<div class="modal-header">
+					<h1 style="color: white;" >Please Wait ... Loading !!!</h1>
+				</div>
+				<div class="modal-body">
+					<div id="ajax_loader">
+						<img th:src="@{images/ajax-loading-c12.gif}"
+							style="display: block; margin-left: auto; margin-right: auto;">
+					</div>
+				</div>
+			</div>
+					<!-- <form th:action="@{/authenticate}" method="post" th:object="${authenticationRequest}">-->
+					<form id="loginform" method="post">
+						<label>User Name: </label> <input size="20" type="text"
+							name="username" id="username"><br> <label>Password:
+						</label> <input size="20" type="password" name="password" id="password">
+
+						<!--  		<input
+							type="submit" value="Login">
+					-->
+
+						<div class="row">
+							<div class="col-sm-12">
+								<button id="login" class="btn btn-primary btn-md left-block"
+									Style="width: 100px;" type="submit">Login</button>
+
+							</div>
+						</div>
+
+						<span id="401" class="d-none" style="color: red; font-size: small">Not
+							Authenticated . Incorrect username or password, try again.</span><br>
+						<hr>
+					</form>
+
+				</div>
+				<div class="col-md-5 log alert alert-warning" role="alert">
+					<br> <span style="color: red; font-size: small"
+						class="align-right">Do not have account . Please register
+						here</span>
+
+					<button id="signup" class="btn btn-success btn-md right-block"
+						Style="width: 100px;" onclick="registerform()">Register</button>
+				</div>
+
+			</div>
+
+		</div>
+
+
+
+	</div>
+
+	</div>
+	<div th:replace="header/header :: footer" />
+</body>
+
+<script>
+	function registerform() {
+		location.href = "/register-form";
+	}
+
+	$(document)
+			.ready(
+					function() {
+						$('#modalCookie1').modal('show');
+						//form submit
+						$("#loginform")
+								.submit(
+										function(event) {
+											var _username = $('#username')
+													.val();
+											var _password = $('#password')
+													.val();
+											event.preventDefault();
+											if (_username != ""
+													&& _password != "") {
+												$('#pleaseWaitDialog').modal();
+												$
+														.ajax({
+															url : '/authenticate',
+															type : 'POST',
+															data : {
+																'username' : _username,
+																'password' : _password
+															},
+															dataType : 'json',
+															success : function(
+																	response) {
+																$
+																		.cookie(
+																				'Bearer',
+																				response.token);
+																console
+																		.log('Login Successful . Token saved into cookies');
+																window.location = '/home';
+															},
+															error : function(
+																	xhr,
+																	status,
+																	error) {
+																var errorMessage = xhr.status
+																		+ ': '
+																		+ xhr.statusText
+																$(
+																		'#pleaseWaitDialog')
+																		.modal(
+																				'hide');
+																$('#401')
+																		.removeClass(
+																				'd-none');
+																console
+																		.log('Error - '
+																				+ errorMessage);
+															}
+														});
+											}
+
+										})
+					});
+</script>
+
+</html>

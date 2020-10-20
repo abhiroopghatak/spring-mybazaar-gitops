@@ -1,0 +1,4 @@
+SCHEMA CREATION:
+
+create table products (product_id varchar(255) not null, create_time datetime2, product_category varchar(255), product_description varchar(255), product_icon varchar(255), product_name varchar(255), product_price numeric(19,2), product_status int default 0, product_stock int, update_time datetime2, primary key (product_id))
+alter table products add producer varchar(255)	

@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+</head>
+
+
+<body>
+	<link th:href="@{/css/custom/order.css}" rel="stylesheet"
+		type="text/css" media="all" />
+
+	<div th:replace="header/header :: all_product_header" />
+
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<h4 class="text-muted text-center">Your Order History</h4>
+
+
+				<span class="d-none" id="_ordernumbers"
+					th:text="${#lists.size(ordlist)}"></span>
+
+				<div id="noorderalert" class="alert alert-info d-none" role="alert">None
+					orders placed in the past . Please continue shopping</div>
+				<ul id="orderlistdisplayul" class="list-group d-none">
+
+					<li
+						class="list-group-item d-flex justify-content-between align-items-center"
+						data-th-each="order : ${ordlist}"><a
+						class="myClickableThingy"
+						th:onclick="'javascript:getOrderDetail(' + ${order.oid} + ');'">
+							<div class="container">
+								<div class="row">
+									<div class="col-sm">
+										<b>order Id:</b> <span th:text="${order.oid}"
+											onlclick="showOrderDetails(0)"> </span>
+									</div>
+									<div class="col-sm">
+										<b>order state: </b><span th:text="${order.orderstate}"></span>
+									</div>
+									<div class="col-sm">
+										<b>order shipPrice:</b> <span th:text="${order.shipPrice}"></span>
+									</div>
+									<div class="col-sm">
+										<b>order taxPrice:</b> <span th:text="${order.taxPrice}"></span>
+									</div>
+									<div class="col-sm">
+										<b>totalProductPrice:</b> <span
+											th:text="${order.totalProductPrice}"></span>
+									</div>
+									<div class="col-sm">
+										<b>order date: </b><span th:text="${order.odate.time}"></span>
+									</div>
+									<div class="col-sm">
+										<img th:src="@{/product_images/2.jpg}" class="img-fluid"
+											alt="quixote" />
+									</div>
+								</div>
+							</div>
+					</a></li>
+
+				</ul>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Modal -->
+	<div class="modal fade" id="myOrderModal" role="dialog">
+		<div class="modal-dialog modal-lg">
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+
+					<h4 class="modal-title">Order Details</h4>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body shop-tracking-status">
+
+					<div id="orderid">
+						<div id="loadingdiv" class="jumbotron text-center">
+							<i class="fa fa-circle-o-notch fa-spin"></i> loading...
+						</div>
+					</div>
+					<br />
+					<div class="order-status">
+
+						<div class="order-status-timeline">
+							<!-- class names: c0 c1 c2 c3 and c4 -->
+							<div class="order-status-timeline-completion c1"></div>
+						</div>
+
+						<div
+							class="image-order-status image-order-status-new active img-circle">
+							<span class="status">Accepted</span>
+							<div class="icon"></div>
+						</div>
+						<div
+							class="image-order-status image-order-status-active active img-circle">
+							<span class="status">In progress</span>
+							<div class="icon"></div>
+						</div>
+
+						<div
+							class="image-order-status image-order-status-intransit active img-circle">
+							<span class="status">Shipped</span>
+							<div class="icon"></div>
+						</div>
+						<div
+							class="image-order-status image-order-status-delivered active img-circle">
+							<span class="status">Delivered</span>
+							<div class="icon"></div>
+						</div>
+						<div
+							class="image-order-status image-order-status-completed active img-circle">
+							<span class="status">Completed</span>
+							<div class="icon"></div>
+						</div>
+
+					</div>
+					<br />
+
+					<div id="emailbtn" class="row d-none">order Track</div>
+					<div id="email-conf-alert" class="alert alert-success d-none"
+						role="alert">Your selected order details has been sent to
+						your registered email id.</div>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="header/header :: footer" />
+
+
+</body>
+
+<script type="text/javascript">
+	var orderDetail = '';
+	$(document).ready(function() {
+
+		var _ordernumbers = $('#_ordernumbers').text();
+
+		if (_ordernumbers > 0) {
+			$('#noorderalert').addClass('d-none');
+			$('#orderlistdisplayul').removeClass('d-none');
+		} else {
+			$('#noorderalert').removeClass('d-none');
+			$('#orderlistdisplayul').addClass('d-none');
+		}
+
+	});
+
+	function sendOrderToemail(oid) {
+		console.log('email request for order#' + orderDetail.oid);
+
+		event.preventDefault();
+		$('#load').prop("disabled", true);
+		// add spinner to button
+		$('#load')
+				.html(
+						'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> in just a minute...');
+		$
+				.ajax({
+					url : '/sendOrderToemail',
+					type : 'POST',
+					data : {
+						'oid' : oid
+					},
+					dataType : 'json',
+					success : function(response) {
+						console.log(response);
+						$('#email-conf-alert').removeClass('d-none');
+						$('#load').prop("disabled", false);
+						$('#load')
+								.html(
+										'<button id="load" type="button" class="btn btn-success btn-sm  " onclick="sendOrderToemail('
+												+ orderDetail.oid
+												+ ')" >Send Order in registered email . <i class="fa fa-envelope fa-2x"></i></button>')
+					},
+					error : function(xhr, status, error) {
+						var errorMessage = xhr.status + ': ' + xhr.statusText
+						console.log('Error - ' + errorMessage);
+					}
+				});
+
+	}
+	function getOrderDetail(oid) {
+		$('#email-conf-alert').addClass('d-none');
+		console.log('show details of order#' + oid);
+		$
+				.ajax({
+					url : '/loadOrderById?oid=' + oid,
+					type : 'GET',
+					success : function(response) {
+						console.log(response);
+
+						orderDetail = response;
+						if (orderDetail.oid > 0) {
+							$('#orderid')
+									.html(
+											'<div class="container"><div class="row"><div class="col-sm"><b>order Id:</b> <span> '
+													+ orderDetail.oid
+													+ '</span></div><div class="col-sm"><b>order date: </b></div><div class="col-sm"><b>order state: </b> '
+													+ orderDetail.orderstate
+													+ '</div><div class="col-sm"><b>totalProducts:</b>'
+													+ orderDetail.totalProductPrice
+													+ '</div></div></div>');
+
+							$('#emailbtn').removeClass('d-none');
+							$('#emailbtn')
+									.html(
+											'<button id="load" type="button" class="btn btn-success btn-sm  " onclick="sendOrderToemail('
+													+ orderDetail.oid
+													+ ')" >Send Order in registered email . <i class="fa fa-envelope fa-2x"></i></button>')
+						} else {
+							$('#orderid')
+									.html(
+											'<div class="container"> None details found in system . Please connect Support.</div>');
+						}
+					},
+					error : function(xhr, status, error) {
+						var errorMessage = xhr.status + ': ' + xhr.statusText
+						console.log('Error - ' + errorMessage);
+					}
+				});
+
+		$('#myOrderModal').modal({
+			show : true
+		});
+	}
+</script>
+
+</html>

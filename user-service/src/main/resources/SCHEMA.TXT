@@ -1,0 +1,5 @@
+create table roles (id bigint identity not null, description varchar(255), modified_on datetime2, name varchar(255), user_id bigint, primary key (id))
+
+create table user_roles (user_id bigint not null, role_id bigint not null, primary key (user_id, role_id))
+
+create table users (id bigint identity not null, email varchar(255), first_name varchar(255), last_name varchar(255), password varchar(255), username varchar(255), primary key (id))

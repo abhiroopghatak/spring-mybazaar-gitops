@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header/header :: header">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+</head>
+
+
+<body>
+	<div th:replace="header/header :: all_product_header" />
+
+	<div class="contact">
+
+		<hr />
+		<span class="d-none" id ="_username" th:text="${loggedInUser.username}"></span>
+		<h1 class="text-center">
+			Welcome <span th:text="${loggedInUser.username}"></span> to the
+			Shopping portal !
+		</h1>
+		<hr />
+		<div class="container-fluid">
+			<div class="modal " id="pleaseWaitDialog" data-backdrop="static"
+				data-keyboard="false">
+				<div class="modal-header">
+					<h1 style="color: white;">Please Wait ... Loading !!!</h1>
+				</div>
+				<div class="modal-body">
+					<div id="ajax_loader">
+						<img th:src="@{images/ajax-loading-c12.gif}"
+							style="display: block; margin-left: auto; margin-right: auto;">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="card text-white bg-primary mb-3  myClickableThingy">
+						<a onclick="getProductsInCategory('BEVERAGE')" class="card-link">
+							<img class="card-img-top" th:src="@{images/categ/BEVERAGE.jpg}"
+							alt="Card image">
+							<div class="card-body">
+								<hr />
+								<h5 class="card-title">Beverages</h5>
+								<p class="card-text">Multiple beverages options are
+									available.</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card text-white bg-warning  mb-3 myClickableThingy">
+						<a onclick="getProductsInCategory('GROCERRY')"> <img
+							class="card-img-top" th:src="@{images/categ/GROCERRY.jpg}"
+							alt="Card image cap">
+							<div class="card-body">
+								<hr />
+								<h5 class="card-title">Grocery</h5>
+								<p class="card-text">Monthly essential items avaialble here
+									.</p>
+							</div></a>
+					</div>
+				</div>
+
+				<div class="col-sm-4">
+					<div class="card bg-light mb-3  myClickableThingy">
+						<a onclick="getProductsInCategory('JEWELLERY')"> <img
+							class="card-img-top" th:src="@{images/categ/JEWELLERY.jpg}"
+							alt="Card image cap">
+							<div class="card-body">
+								<hr />
+								<h5 class="card-title">Jewellery</h5>
+								<p class="card-text">New collection of jewellery to browse
+									here</p>
+							</div></a>
+					</div>
+				</div>
+
+			</div>
+			<hr />
+
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="card text-white bg-success mb-3 myClickableThingy">
+						<a onclick="getProductsInCategory('FOOTWEAR')"><img
+							class="card-img" th:src="@{images/categ/FOOTWEAR.jpg}"
+							alt="Card image">
+							<div class="card-body">
+								<hr />
+								<h5 class="card-title">Footwear</h5>
+								<p class="card-text">Sports shoe and luxury footwear is
+									available here</p>
+							</div></a>
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<div class="card text-white bg-dark mb-3 myClickableThingy">
+						<a onclick="getProductsInCategory('BOOK')"> <img
+							class="card-img-top" th:src="@{images/categ/BOOK.jpg}"
+							alt="Card image cap">
+							<div class="card-body">
+								<hr />
+								<h5 class="card-title">Good Read</h5>
+								<p class="card-text">Great collection to spend time with
+									yourself.</p>
+							</div></a>
+					</div>
+				</div>
+
+				<div class="col-sm-4">
+					<div class="card text-white bg-danger mb-3 myClickableThingy">
+						<a onclick="getProductsInCategory('ELECTRONICS')"> <img
+							class="card-img-top" th:src="@{images/categ/ELECTRONICS.jpg}"
+							alt="Card image cap">
+							<div class="card-body">
+								<hr />
+								<h5 class="card-title">Electronics</h5>
+								<p class="card-text">Great stuff to bring your home.</p>
+							</div></a>
+					</div>
+				</div>
+
+
+
+			</div>
+			<div class="row">
+				<div class="container my-4">
+
+					<h2 id="prodlistgridheader" class="my-5 h2 d-none">Add
+						products to Cart for checkout</h2>
+					<div id="itemaddedsuccess" class="alert alert-success d-none"
+						role="alert">Item is successfully added to the cart.</div>
+						<div id="itemaddedfailure" class="alert alert-warning d-none"
+						role="alert">Item could not added to the cart.</div>
+
+					<div id="productlistdisplay" class="col-md-12 product-model-sec">
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<div th:replace="header/header :: footer" />
+
+
+</body>
+
+<script type="text/javascript">
+	var prodlist = [];
+	var filteredlist = [];
+	var category = '';
+	$(document).ready(function(event) {
+		var username = $('#_username').text()
+		console.log("username="+username);
+		localStorage.setItem("loggedInUser",username );
+		$('#pleaseWaitDialog').modal();
+		$.ajax({
+			url : '/prodlist',
+			type : 'GET',
+			success : function(response) {
+				$('#pleaseWaitDialog').modal('hide');
+				console.log(response);
+
+				for ( var key in response.result) {
+					prodlist[key] = response.result[key];
+				}
+				console.log('prodlist =' + prodlist);
+
+			},
+			error : function(xhr, status, error) {
+				$('#pleaseWaitDialog').modal('hide');
+				var errorMessage = xhr.status + ': ' + xhr.statusText
+				console.log('Error - ' + errorMessage);
+			}
+		});
+
+	});
+
+	function getProductsInCategory(categ) {
+		$('#itemaddedsuccess').addClass('d-none');
+		$('#itemaddedfailure').addClass('d-none');
+		if (category != categ) {
+			category = categ;
+			filteredlist = [];
+
+			for (var i = 0; i < prodlist.length; i++) {
+				if (prodlist[i].productCategory == categ) {
+					filteredlist.push(prodlist[i]);
+				}
+			}
+			var html_option = 'No product available in this category. Please come back later!!!';
+
+			if (Array.isArray(filteredlist) && filteredlist.length) {
+				html_option = '';
+				$
+						.each(
+								filteredlist,
+								function(index, product) {
+
+									html_option += ' <div class="product-grid love-grid" ><a th:href="#"><div class="more-product"><span> </span></div><div lass="product-img b-link-stripe b-animate-go  thickbox"><img style="height: 230px; width: 250px" src="/product_images/'+product.productId+ '.jpg" class="img-responsive" alt=""/></div></a><div class="product-info simpleCart_shelfItem"><div class="product-info-cust"><h4 >category '
+											+ product.productCategory
+											+ '<br/> Name : '
+											+ product.productName
+											+ '</h4><span>Rs. <span class="item_price" text="">'
+											+ product.productPrice
+											+ '</span></span><br/><input type="button" class="item_add items" value="Add to Cart"  onclick="addToCart('
+											+ "'"
+											+ product.productId
+											+ "'"
+											+ ')"></div><div class="clearfix"></div></div></div>';
+
+								});
+
+			}
+			$("#productlistdisplay").html(html_option);
+			$('#prodlistgridheader').removeClass('d-none');
+			$('#prodlistgridheader').focus();
+
+		}
+		console.log('filtered prodlist =' + filteredlist);
+	}
+
+	function addToCart(pid) {
+		console.log(pid + ' add to cart request send.');
+		$('#itemaddedfailure').addClass('d-none');
+		$('#itemaddedsuccess').addClass('d-none');
+		event.preventDefault();
+		$.ajax({
+			url : '/addToCart',
+			type : 'POST',
+			data : {
+				'productId' : pid
+			},
+			dataType : 'json',
+			success : function(response) {
+				console.log(response);
+				if (response) {
+					$('#itemaddedsuccess').removeClass('d-none');
+					$('#itemaddedfailure').addClass('d-none');
+				}else{
+					$('#itemaddedsuccess').addClass('d-none');
+					$('#itemaddedfailure').removeClass('d-none');
+				}
+			},
+			error : function(xhr, status, error) {
+				var errorMessage = xhr.status + ': ' + xhr.statusText
+				console.log('Error - ' + errorMessage);
+			}
+		});
+
+	}
+</script>
+
+</html>
