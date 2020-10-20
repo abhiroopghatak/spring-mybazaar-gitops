@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cart-service-helm.fullname" . }}
+  labels:
+    {{- include "cart-service-helm.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "cart-service-helm.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Values.application }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "cart-service-helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "cart-service-helm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/part-of: {{ .Values.application }}
+    spec:
+      imagePullSecrets: 
+        - name: {{ .Values.imagePullSecret }}
+      serviceAccountName: {{ include "cart-service-helm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+          - name: DB_SERVER
+            valueFrom:
+              configMapKeyRef:
+                name: db-url
+                key: db-url
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.service.path }}
+              port: http
+            initialDelaySeconds: 90
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.service.path }}
+              port: http
+            initialDelaySeconds: 120
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
