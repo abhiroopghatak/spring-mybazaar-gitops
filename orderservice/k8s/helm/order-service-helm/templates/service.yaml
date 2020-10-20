@@ -1,0 +1,42 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ include "order-service-helm.fullname" . }}
+  labels:
+    serving.knative.dev/visibility: {{ .Values.service.label }}
+spec:
+  template:
+    metadata:
+     annotations:
+       queue.sidecar.serving.knative.dev/resourcePercentage: "20"
+    spec:
+      imagePullSecrets: 
+        - name: {{ .Values.imagePullSecret }}
+      containers:
+      - name: {{ .Chart.Name }}
+        env:
+        - name: DB_SERVER
+          valueFrom:
+              configMapKeyRef:
+                name: db-url
+                key: db-url
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        livenessProbe:
+          exec:
+            command: ["sh", "-c", "curl -s http://localhost:{{ .Values.service.port }}/"]
+          initialDelaySeconds: 60
+        readinessProbe:
+          exec:
+            command: ["sh", "-c", "curl -s http://localhost:{{ .Values.service.port }}{{ .Values.service.path }}"]
+          initialDelaySeconds: 65
+        resources:
+         limits:
+          cpu: 300m
+          memory: 400Mi
+         requests:
+          cpu: 300m
+          memory: 400Mi
+
